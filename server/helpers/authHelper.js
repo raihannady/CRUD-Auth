@@ -88,11 +88,11 @@ const login = async (dataObject) => {
 };
 
 const forgotpassword = async (dataObject) => {
-  const { email, newPassword, confirmPassword } = dataObject;
+  const { otp, newPassword, confirmPassword } = dataObject;
 
   try {
     const user = await db.student.findOne({
-      where: { email },
+      where: { otp },
     });
     if (_.isEmpty(user)) {
       return Promise.reject(Boom.notFound("USER_NOT_FOUND"));
@@ -105,19 +105,43 @@ const forgotpassword = async (dataObject) => {
 
     if (newPassword !== confirmPassword) {
       return Promise.reject(Boom.badRequest("PASSWORD_NOT_SAME"));
+    } else if (otp !== otp) {
+      return Promise.reject(Boom.badRequest("OTP_NOT_SAME"));
     }
 
     const hashedPass = __hashPassword(newPassword);
 
     await db.student.update(
-      { password: hashedPass },
-      { where: { email: email } }
+      { otp: otp, password: hashedPass },
+      { where: { otp: otp } }
     );
 
     return Promise.resolve({ message: "Change password success" });
   } catch (err) {
     // console.log(email);
     console.log([fileName, "login", "ERROR"], { info: `${err}` });
+    return Promise.reject(GeneralHelper.errorResponse(err));
+  }
+};
+
+const generateOTP = async (dataObject) => {
+  const { email } = dataObject;
+
+  try {
+    const user = await db.student.findOne({
+      where: { email },
+    });
+    if (_.isEmpty(user)) {
+      return Promise.reject(Boom.notFound("USER_NOT_FOUND"));
+    }
+
+    const createOTP = Math.floor(1000 + Math.random() * 9000);
+
+    await db.student.update({ otp: createOTP }, { where: { email: email } });
+
+    return Promise.resolve({ message: "Email Submitted", otp: createOTP });
+  } catch (err) {
+    console.log([fileName, "generateOTP", "ERROR"], { info: `${err}` });
     return Promise.reject(GeneralHelper.errorResponse(err));
   }
 };
@@ -152,6 +176,7 @@ const changepassword = async (dataObject) => {
 
 module.exports = {
   registerUser,
+  generateOTP,
   login,
   forgotpassword,
   changepassword,

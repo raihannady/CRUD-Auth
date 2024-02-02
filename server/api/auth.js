@@ -46,12 +46,31 @@ const forgotpassword = async (request, reply) => {
     // Validation.loginValidation(request.body);
     // const id = parseInt(request.params["id"]);
 
-    const { verifiedUser, newPassword, confirmPassword } = request.body;
-    const email = verifiedUser.email;
+    const { otp, newPassword, confirmPassword } = request.body;
     const response = await AuthHelper.forgotpassword({
-      email,
+      otp,
       newPassword,
       confirmPassword,
+    });
+
+    return reply.send(response);
+  } catch (err) {
+    console.log(request.body);
+    console.log([fileName, "forgotpassword", "ERROR"], { info: `${err}` });
+    return reply.send(GeneralHelper.errorResponse(err));
+  }
+};
+const generateOTP = async (request, reply) => {
+  try {
+    // Validation.loginValidation(request.body);
+    // const id = parseInt(request.params["id"]);
+
+    const { email } = request.body;
+    // const email = verifiedUser.email;
+    const response = await AuthHelper.generateOTP({
+      email,
+      //   newPassword,
+      //   confirmPassword,
     });
 
     return reply.send(response);
@@ -90,7 +109,8 @@ const hello = async (request, reply) => {
 Router.post("/register", register);
 Router.post("/login", login);
 Router.get("/hello", Middleware.validateToken, hello);
-Router.patch("/forgot-password", Middleware.validateToken, forgotpassword);
+Router.post("/forgot-password", generateOTP);
+Router.patch("/reset-password", forgotpassword);
 Router.patch("/:id/change-password", Middleware.validateToken, changepassword);
 
 module.exports = Router;
