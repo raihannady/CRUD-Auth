@@ -61,27 +61,28 @@ const login = async (dataObject) => {
 
   try {
     const user = await db.student.findOne({
-      where: { email: email },
+      where: { email },
     });
+
     if (_.isEmpty(user)) {
       return Promise.reject(Boom.notFound("USER_NOT_FOUND"));
     }
 
     const isPassMatched = __comparePassword(password, user.password);
+
     if (!isPassMatched) {
       return Promise.reject(Boom.badRequest("WRONG_CREDENTIALS"));
     }
 
     const token = __generateToken({
       fullname: user.fullname,
-      email: user.email,
-      nickname: user.nickname,
       password: user.password,
+      email: user.email,
+      role: user.role,
     });
 
-    return Promise.resolve({ message: "Login Success", token });
+    return Promise.resolve({ token });
   } catch (err) {
-    console.log(email);
     console.log([fileName, "login", "ERROR"], { info: `${err}` });
     return Promise.reject(GeneralHelper.errorResponse(err));
   }

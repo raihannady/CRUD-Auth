@@ -54,7 +54,7 @@ const studentCourse = async (req, res) => {
 };
 const addStudent = async (req, res) => {
   try {
-    Validation.studentValidation(req.query);
+    Validation.registerValidation(req.body);
 
     const data = await studentHelper.addStudent({ ...req.body });
 

@@ -2,7 +2,7 @@ const db = require("../../models");
 
 const getStudentList = async () => {
   let studentList = await db.student.findAll({
-    attributes: ["id", "fullname", "nickname"],
+    attributes: ["id", "fullname", "nickname", "email", "lecturer_id"],
   });
 
   return Promise.resolve({ message: "Get Student List", studentList });
@@ -21,7 +21,7 @@ const getStudentDetail = async (dataObject) => {
 const getStudentLecturer = async () => {
   let studentLecturerList = await db.student.findAll({
     include: ["lecturer"],
-    attributes: ["id", "fullname", "nickname"],
+    // attributes: ["id", "fullname", "nickname"],
   });
 
   return Promise.resolve({
@@ -32,7 +32,7 @@ const getStudentLecturer = async () => {
 
 const getStudentCourse = async () => {
   let studentCourse = await db.studentcourse.findAll({
-    include: ["course", "student"],
+    include: ["student", "course"],
     attributes: ["id"],
   });
 
